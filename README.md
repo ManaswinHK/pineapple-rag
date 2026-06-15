@@ -20,23 +20,23 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 🐳 Docker Deployment (Recommended)
+## 🚀 Deployment (Recommended)
 
-The easiest way to run the entire system is using Docker. This fully automates the backend server and pulls the required AI models automatically.
+The easiest way to run the entire system is to use the included deployment scripts. They will automatically download the pre-built Docker image, initialize the AI models, and auto-detect your hardware.
 
-### For CPU Only (Default)
+**If you have an NVIDIA GPU**, the script will automatically detect it and route the AI workloads to your graphics card for maximum speed! Otherwise, it will gracefully fallback to CPU mode.
+
+**For Windows:**
+Simply double-click `deploy.bat` or run:
 ```bash
-docker-compose up --build -d
+deploy.bat
 ```
 
-### For NVIDIA GPU Acceleration 🚀
-If you have an NVIDIA GPU and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed, you can drastically speed up the AI responses by routing the workload to your GPU:
-
+**For Mac/Linux:**
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d
+chmod +x deploy.sh
+./deploy.sh
 ```
-
----
 
 Wait a few minutes for the system to start (it will download the `llama3` model in the background on its first run). 
 Then, open your browser and navigate to:
