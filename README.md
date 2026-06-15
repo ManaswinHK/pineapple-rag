@@ -22,31 +22,63 @@ Before you begin, ensure you have the following installed:
 
 ## 🚀 Getting Started
 
-### Step 1: Install and Start Ollama
-Ensure the Ollama application is running on your machine.
-Open a terminal and pull the `llama3` model (the default model optimized for our strict RAG guardrails):
+> **⚠️ IMPORTANT: You need two terminal windows open at the same time. One for Ollama, one for the backend.**
+
+---
+
+### Step 1: Download the AI Model
+Open a terminal and run this once to download the `llama3` model (~4.7 GB):
 ```bash
 ollama pull llama3
 ```
+Wait for the download to finish before continuing.
 
-### Step 2: Install Python Dependencies
-Navigate to the `ai-service` directory and install the required packages:
+---
+
+### Step 2: Keep Ollama Running (Terminal 1 — leave this open)
+**This is the step most people miss.** Ollama must be actively running as a background service for the AI to work. In your **first terminal**, run:
+```bash
+ollama serve
+```
+You should see output like `Listening on 127.0.0.1:11434`. **Leave this terminal open.** If you close it, the AI will stop working.
+
+---
+
+### Step 3: Install Python Dependencies (Terminal 2)
+Open a **second terminal**, navigate to the `ai-service` directory, and install packages:
 ```bash
 cd ai-service
 pip install -r requirements.txt
 ```
 
-### Step 3: Start the Backend Server
-Run the FastAPI backend using `uvicorn`:
+---
+
+### Step 4: Start the Backend Server (Terminal 2)
+In the same second terminal, run:
 ```bash
 python -m uvicorn api.main:app --host 127.0.0.1 --port 8080
 ```
-*Note: On startup, the system will automatically parse the `data/` directory and build the ChromaDB vector embeddings.*
+On startup, the system will automatically parse the `data/` directory and build the ChromaDB vector index. You'll see `Successfully indexed X chunks.` when it's ready.
 
-### Step 4: Access the Dashboard
-The backend automatically serves the frontend interface. 
-Simply open your web browser and navigate to:
+---
+
+### Step 5: Access the Dashboard
+Open your web browser and navigate to:
 👉 **http://127.0.0.1:8080/**
+
+---
+
+## 🔧 Troubleshooting
+
+### "Error calling Ollama: All connection attempts failed"
+This means Ollama is **not running**. Go back to Step 2 and make sure `ollama serve` is running in a separate terminal window.
+
+### "Error calling Ollama: ..." (other errors)
+- Make sure you have pulled the model first: `ollama pull llama3`
+- Confirm Ollama is listening on port `11434` by visiting `http://127.0.0.1:11434` in your browser — you should see `Ollama is running`.
+
+### ChromaDB / embedding errors on startup
+Delete the `ai-service/chroma_store/` folder and restart the backend. It will rebuild the index automatically.
 
 ---
 
@@ -56,13 +88,13 @@ Simply open your web browser and navigate to:
 pineaple-rag/
 ├── ai-service/
 │   ├── api/                  # FastAPI routes and server config
-│   ├── data/                 # Simulated outputs from upstream microservices (.md)
-│   ├── frontend/             # HTML/JS for the streaming chat interface
-│   ├── ingestion/            # Logic for loading and semantic chunking of data
-│   ├── rag/                  # RAG generator logic and ChromaDB client
-│   ├── config.py             # Global configuration (Ports, Model Targets)
+│   ├── data/                 # Knowledge base (.md files fed into the RAG pipeline)
+│   ├── frontend/             # Streaming chat UI (HTML/JS)
+│   ├── ingestion/            # Semantic chunking and data loading logic
+│   ├── rag/                  # Generator and ChromaDB retriever
+│   ├── config.py             # Global config (ports, model targets)
 │   └── requirements.txt      # Python dependencies
-└── .gitignore                # Excludes __pycache__ and massive vector db stores
+└── .gitignore
 ```
 
 ---
