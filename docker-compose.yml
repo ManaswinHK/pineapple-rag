@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   ai-service:
-    image: ghcr.io/manaswinhk/pineapple-rag-ai-service:latest
+    build: ./ai-service
     container_name: agritech-ai
     ports:
       - "8080:8080"
@@ -22,6 +22,7 @@ services:
       - DATA_DIR=/app/data
     volumes:
       - chroma_data:/app/chroma_store
+      - ./ai-service/data:/app/data
     depends_on:
       - ollama
     restart: unless-stopped

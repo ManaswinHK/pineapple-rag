@@ -22,7 +22,7 @@ Before you begin, ensure you have the following installed:
 
 ## 🚀 Deployment (Recommended)
 
-The easiest way to run the entire system is to use the included deployment scripts. They will automatically download the pre-built Docker image, initialize the AI models, and auto-detect your hardware.
+The easiest way to run the entire system is to use the included deployment scripts. They will automatically build the Docker image locally, initialize the AI models, and auto-detect your hardware.
 
 **If you have an NVIDIA GPU**, the script will automatically detect it and route the AI workloads to your graphics card for maximum speed! Otherwise, it will gracefully fallback to CPU mode.
 
