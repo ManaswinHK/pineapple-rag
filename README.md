@@ -24,9 +24,20 @@ Before you begin, ensure you have the following installed:
 
 The easiest way to run the entire system is using Docker. This fully automates the backend server and pulls the required AI models automatically.
 
+### For CPU Only (Default)
 ```bash
 docker-compose up --build -d
 ```
+
+### For NVIDIA GPU Acceleration 🚀
+If you have an NVIDIA GPU and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed, you can drastically speed up the AI responses by routing the workload to your GPU:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d
+```
+
+---
+
 Wait a few minutes for the system to start (it will download the `llama3` model in the background on its first run). 
 Then, open your browser and navigate to:
 👉 **http://127.0.0.1:8080/**
