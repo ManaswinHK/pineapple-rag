@@ -20,9 +20,20 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 🚀 Getting Started
+## 🐳 Docker Deployment (Recommended)
 
-> **⚠️ IMPORTANT: You need two terminal windows open at the same time. One for Ollama, one for the backend.**
+The easiest way to run the entire system is using Docker. This fully automates the backend server and pulls the required AI models automatically.
+
+```bash
+docker-compose up --build -d
+```
+Wait a few minutes for the system to start (it will download the `llama3` model in the background on its first run). 
+Then, open your browser and navigate to:
+👉 **http://127.0.0.1:8080/**
+
+---
+
+## 🚀 Manual Local Setup
 
 ---
 
