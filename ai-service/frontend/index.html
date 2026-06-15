@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agritech AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f1a12;
+            --panel-bg: #1a2e1f;
+            --accent: #6b8f71;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(255,255,255,0.06);
+            --crit: #ef4444;
+            --high: #f97316;
+            --med: #eab308;
+            --low: #22c55e;
+            --user-msg: rgba(107, 143, 113, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        select {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: var(--user-msg);
+            border: 1px solid var(--accent);
+        }
+
+        .ai {
+            align-self: flex-start;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+        }
+        
+        .ai p {
+            margin-top: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .badge-CRITICAL { background-color: rgba(239, 68, 68, 0.2); color: var(--crit); border: 1px solid var(--crit); }
+        .badge-HIGH { background-color: rgba(249, 115, 22, 0.2); color: var(--high); border: 1px solid var(--high); }
+        .badge-MEDIUM { background-color: rgba(234, 179, 8, 0.2); color: var(--med); border: 1px solid var(--med); }
+        .badge-LOW { background-color: rgba(34, 197, 94, 0.2); color: var(--low); border: 1px solid var(--low); }
+
+        .sources {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .input-area {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            background-color: var(--bg-color);
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .loading {
+            display: none;
+            align-self: flex-start;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+            Agritech AI
+        </div>
+        <div class="controls">
+            <select id="model-select">
+                <option value="llama3">llama3</option>
+            </select>
+            <select id="farm-select">
+                <option value="">All Farms</option>
+                <option value="Farm 1">Farm 1</option>
+                <option value="Farm 2">Farm 2</option>
+                <option value="Farm 3">Farm 3</option>
+            </select>
+            <button id="brief-btn" style="padding: 6px 12px; font-size: 0.8rem; background-color: var(--panel-bg); border: 1px solid var(--border);">Daily Brief</button>
+        </div>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+        <div class="message ai">
+            <p>Hello! I am your Agritech AI Assistant. I can help analyze vegetation indices, alerts, and workforce data. Ask me anything about your farms.</p>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">Thinking...</div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Ask about your farms..." autocomplete="off">
+        <button id="send-btn">Send</button>
+    </div>
+</div>
+
+<script>
+    const DUMMY_TOKEN = "Bearer dummy_token"; // Mock auth for frontend
+    
+    async function loadModels() {
+        try {
+            const res = await fetch('/api/ai/models', {
+                headers: { 'Authorization': DUMMY_TOKEN }
+            });
+            const data = await res.json();
+            const select = document.getElementById('model-select');
+            if (data.models && data.models.length > 0) {
+                select.innerHTML = '';
+                data.models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (e) {
+            console.error("Failed to load models", e);
+        }
+    }
+
+    function appendMessage(role, content, severity, sources) {
+        const box = document.getElementById('chat-box');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${role}`;
+        
+        let innerHTML = '';
+        if (severity && severity !== 'None') {
+            innerHTML += `<span class="badge badge-${severity}">${severity}</span>`;
+        }
+        
+        if (role === 'ai') {
+            innerHTML += marked.parse(content);
+            if (sources && sources.length > 0) {
+                innerHTML += `<div class="sources">Sources: ${sources.join(', ')}</div>`;
+            }
+        } else {
+            innerHTML += `<p>${content}</p>`;
+        }
+        
+        msgDiv.innerHTML = innerHTML;
+        box.appendChild(msgDiv);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        input.value = '';
+        appendMessage('user', text);
+        
+        document.getElementById('loading').style.display = 'block';
+        
+        const model = document.getElementById('model-select').value;
+        const farmFilter = document.getElementById('farm-select').value;
+        
+        try {
+            const res = await fetch('/api/ai/chat/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': DUMMY_TOKEN
+                },
+                body: JSON.stringify({
+                    query: text,
+                    model: model,
+                    farm_filter: farmFilter || null
+                })
+            });
+            
+            document.getElementById('loading').style.display = 'none';
+
+            const box = document.getElementById('chat-box');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ai';
+            const contentDiv = document.createElement('div');
+            msgDiv.appendChild(contentDiv);
+            box.appendChild(msgDiv);
+            
+            let fullText = "";
+            let sourcesHTML = "";
+            
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, {stream: true});
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep partial line in buffer
+                
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const data = JSON.parse(line);
+                        if (data.type === 'sources' && data.sources.length > 0) {
+                            sourcesHTML = `<div class="sources">Sources: ${data.sources.join(', ')}</div>`;
+                        } else if (data.type === 'chunk' || data.type === 'error') {
+                            fullText += data.text;
+                            
+                            // Check for severity tags dynamically
+                            let displayHTML = '';
+                            let severityMatch = fullText.match(/\[(CRITICAL|HIGH|MEDIUM|LOW)\]/);
+                            if (severityMatch) {
+                                const severity = severityMatch[1];
+                                displayHTML += `<span class="badge badge-${severity}">${severity}</span>`;
+                            }
+                            
+                            displayHTML += marked.parse(fullText);
+                            if (sourcesHTML) {
+                                displayHTML += sourcesHTML;
+                            }
+                            contentDiv.innerHTML = displayHTML;
+                            box.scrollTop = box.scrollHeight;
+                        }
+                    } catch (e) {
+                        console.error("Parse error on chunk:", e);
+                    }
+                }
+            }
+        } catch (e) {
+            appendMessage('ai', "Error connecting to AI service.");
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    async function getDailyBrief() {
+        document.getElementById('loading').style.display = 'block';
+        try {
+            const res = await fetch('/api/ai/daily-brief', {
+                headers: { 'Authorization': DUMMY_TOKEN }
+            });
+            const data = await res.json();
+            appendMessage('ai', `**Daily Brief (${new Date(data.generated_at).toLocaleString()}):**\n\n` + data.brief, null, []);
+        } catch (e) {
+            appendMessage('ai', "Error fetching daily brief.");
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    document.getElementById('user-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    document.getElementById('brief-btn').addEventListener('click', getDailyBrief);
+
+    // Initialize
+    loadModels();
+</script>
+
+</body>
+</html>
